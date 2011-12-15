@@ -32,26 +32,29 @@ public class TiMenuSupport
 
 	public boolean onCreateOptionsMenu(boolean created, Menu menu) 
 	{
-		KrollCallback onCreate = (KrollCallback) activityProxy.getProperty(TiC.PROPERTY_ON_CREATE_OPTIONS_MENU);
-		KrollCallback onPrepare = (KrollCallback) activityProxy.getProperty(TiC.PROPERTY_ON_PREPARE_OPTIONS_MENU);
-		if (onCreate != null) {
-			KrollDict event = new KrollDict();
-			if (menuProxy != null) {
-				if (!menuProxy.getMenu().equals(menu)) {
-					menuProxy.setMenu(menu);
+		if(menu != null && activityProxy != null && menuProxy != null) {
+			KrollCallback onCreate = (KrollCallback) activityProxy.getProperty(TiC.PROPERTY_ON_CREATE_OPTIONS_MENU);
+			KrollCallback onPrepare = (KrollCallback) activityProxy.getProperty(TiC.PROPERTY_ON_PREPARE_OPTIONS_MENU);
+			if (onCreate != null) {
+				KrollDict event = new KrollDict();
+				if (menuProxy != null) {
+					if (!menuProxy.getMenu().equals(menu)) {
+						menuProxy.setMenu(menu);
+					}
+				} else {
+					menuProxy = new MenuProxy(activityProxy.getTiContext(), menu);
 				}
-			} else {
-				menuProxy = new MenuProxy(activityProxy.getTiContext(), menu);
+				event.put(TiC.EVENT_PROPERTY_MENU, menuProxy);
+				onCreate.callSync(activityProxy.getTiContext(), new Object[] { event });
 			}
-			event.put(TiC.EVENT_PROPERTY_MENU, menuProxy);
-			onCreate.callSync(activityProxy.getTiContext(), new Object[] { event });
+			// If a callback exists then return true.
+			// There is no need for the Ti Developer to support both methods.
+			if (onCreate != null || onPrepare != null) {
+				created = true;
+			}
+			return created;
 		}
-		// If a callback exists then return true.
-		// There is no need for the Ti Developer to support both methods.
-		if (onCreate != null || onPrepare != null) {
-			created = true;
-		}
-		return created;
+		return false;
 	}
 	
 	public boolean onOptionsItemSelected(MenuItem item) 

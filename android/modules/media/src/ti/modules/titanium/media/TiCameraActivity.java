@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.appcelerator.titanium.TiBaseActivity;
 import org.appcelerator.titanium.proxy.TiViewProxy;
+import ti.modules.titanium.media.MediaModule;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
@@ -21,6 +22,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
+import org.appcelerator.titanium.kroll.KrollCallback;
 
 public class TiCameraActivity extends TiBaseActivity implements SurfaceHolder.Callback {
 	private static final String LCAT = "TiCameraActivity";
@@ -34,6 +36,10 @@ public class TiCameraActivity extends TiBaseActivity implements SurfaceHolder.Ca
 	public static boolean autohide = true;
 	public static TiViewProxy overlayProxy = null;
 	public static TiCameraActivity cameraActivity = null;
+	public static KrollCallback successCallback = null;
+	public static KrollCallback errorCallback = null;
+	public static KrollCallback cancelCallback = null;
+	public static MediaModule mediaModule = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -58,19 +64,24 @@ public class TiCameraActivity extends TiBaseActivity implements SurfaceHolder.Ca
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		setContentView(previewLayout);
 	}
-
-	public void surfaceChanged(SurfaceHolder previewHolder, int format, int width, int height) {
-		camera.startPreview();  // make sure setPreviewDisplay is called before this
+	
+	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		// Now that the size is known, set up the camera parameters and begin
+		// the preview.
+		Camera.Parameters parameters = camera.getParameters();
+		parameters.setPreviewSize(w, h);
+		camera.setParameters(parameters);
+		camera.startPreview();
 	}
 
 	public void surfaceCreated(SurfaceHolder previewHolder) {
 		camera = Camera.open();
 
 		// using default preview size may be causing problem on some devices, setting dimensions manually
-		Parameters cameraParams = camera.getParameters();
+		/* Parameters cameraParams = camera.getParameters();
 		Camera.Size previewSize = cameraParams.getSupportedPreviewSizes().get((cameraParams.getSupportedPreviewSizes().size()) - 1);
 		cameraParams.setPreviewSize(previewSize.width, previewSize.height );
-		camera.setParameters(cameraParams);
+		camera.setParameters(cameraParams); */
 
 		try {
 			Log.i(LCAT, "setting preview display");
@@ -142,6 +153,14 @@ public class TiCameraActivity extends TiBaseActivity implements SurfaceHolder.Ca
 					cameraActivity.setResult(Activity.RESULT_OK);
 					cameraActivity.finish();
 				}
+				try {
+					if (successCallback != null) {
+						successCallback.callAsync(mediaModule.createDictForImage(cameraActivity.storageUri.toString(), "image/jpeg"));
+					}
+				} catch (OutOfMemoryError e) {
+					String msg = "Not enough memory to get image: " + e.getMessage();
+					Log.e(LCAT, msg);
+				}									
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

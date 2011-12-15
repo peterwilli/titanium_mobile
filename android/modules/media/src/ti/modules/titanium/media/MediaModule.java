@@ -118,8 +118,12 @@ public class MediaModule extends KrollModule
 			TiCameraActivity.overlayProxy = (TiViewProxy) options.get("overlay");
 		}
 		if (options.containsKey("autohide")) {
-			TiCameraActivity.autohide = TiConvert.toBoolean(options.get("autohide"));
+			TiCameraActivity.autohide = options.getBoolean("autohide");
 		}
+		TiCameraActivity.successCallback = successCallback;
+		TiCameraActivity.cancelCallback = cancelCallback;
+		TiCameraActivity.errorCallback = errorCallback;
+		TiCameraActivity.mediaModule = this;
 
 		if (DBG) {
 			Log.d(LCAT, "showCamera called");

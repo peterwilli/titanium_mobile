@@ -58,9 +58,9 @@ public class TiNinePatchHelper
 	}
 
 	private boolean isNinePatch(Bitmap b) {
-		boolean result = true;
+		boolean result = false;
 
-		int width = b.getWidth();
+		/*int width = b.getWidth();
 		int height = b.getHeight();
 
 		int topSum = 0;
@@ -107,8 +107,7 @@ public class TiNinePatchHelper
 		// Don't consider a transparent border a ninepatch
 		if (leftSum + topSum + rightSum + bottomSum == 0) {
 			result = false;
-		}
-
+		}*/
 		return result;
 	}
 
