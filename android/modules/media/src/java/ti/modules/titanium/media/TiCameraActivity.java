@@ -1,10 +1,13 @@
 package ti.modules.titanium.media;
 
+import ti.modules.titanium.media.MediaModule;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.appcelerator.titanium.TiBaseActivity;
+import org.appcelerator.kroll.KrollFunction;
 import org.appcelerator.titanium.proxy.TiViewProxy;
 
 import android.app.Activity;
@@ -34,6 +37,10 @@ public class TiCameraActivity extends TiBaseActivity implements SurfaceHolder.Ca
 	public static boolean autohide = true;
 	public static TiViewProxy overlayProxy = null;
 	public static TiCameraActivity cameraActivity = null;
+	public static MediaModule mediaModule = null;
+	public static KrollFunction cancelCallback = null;
+	public static KrollFunction successCallback = null;
+	public static KrollFunction errorCallback = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -142,6 +149,17 @@ public class TiCameraActivity extends TiBaseActivity implements SurfaceHolder.Ca
 					cameraActivity.setResult(Activity.RESULT_OK);
 					cameraActivity.finish();
 				}
+				try {
+					if (successCallback != null) {
+						successCallback.callAsync(mediaModule.getKrollObject(), mediaModule.createDictForImage(cameraActivity.storageUri.toString(), "image/jpeg"));
+					}
+				} catch (OutOfMemoryError e) {
+					String msg = "Not enough memory to get image: " + e.getMessage();
+					Log.e(LCAT, msg);
+					if (errorCallback != null) {
+						errorCallback.callAsync(mediaModule.getKrollObject(), mediaModule.createErrorResponse(mediaModule.UNKNOWN_ERROR, msg));
+					}
+				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -150,5 +168,3 @@ public class TiCameraActivity extends TiBaseActivity implements SurfaceHolder.Ca
 		}
 	};
 }
-
-

@@ -725,7 +725,7 @@ public class KrollProxy implements Handler.Callback, KrollProxySupport
 		return proxyId;
 	}
 
-	protected KrollDict createErrorResponse(int code, String message)
+	public KrollDict createErrorResponse(int code, String message)
 	{
 		KrollDict error = new KrollDict();
 		error.put(TiC.ERROR_PROPERTY_CODE, code);

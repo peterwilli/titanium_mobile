@@ -124,15 +124,19 @@ public class MediaModule extends KrollModule
 		KrollFunction successCallback = null;
 		KrollFunction cancelCallback = null;
 		KrollFunction errorCallback = null;
+		TiCameraActivity.mediaModule = this;
 
 		if (options.containsKey("success")) {
 			successCallback = (KrollFunction) options.get("success");
+			TiCameraActivity.successCallback = successCallback;
 		}
 		if (options.containsKey("cancel")) {
 			cancelCallback = (KrollFunction) options.get("cancel");
+			TiCameraActivity.cancelCallback = successCallback;
 		}
 		if (options.containsKey("error")) {
 			errorCallback = (KrollFunction) options.get("error");
+			TiCameraActivity.errorCallback = errorCallback;
 		}
 		if (options.containsKey("overlay")) {
 			TiCameraActivity.overlayProxy = (TiViewProxy) options.get("overlay");
